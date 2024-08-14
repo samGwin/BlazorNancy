@@ -12,7 +12,26 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.5" PrivateAssets="all" />
   </ItemGroup>
   
+  <!--
 	<Target Name="StaticWebAssets" AfterTargets="Publish">
 		<Exec Command="dotnet msbuild /t:GenerateStaticWebAssets /p:Configuration=$(Configuration)" />  
 	</Target>
+  -->
+
+  <!-- Copy index.html to the root of the doc directory -->
+  <!--
+  <Target Name="PostBuild" AfterTargets="Publish">
+    <Copy SourceFiles="$(PublishDir)wwwroot\index.html" DestinationFolder="$(PublishDir)" />
+    <Copy SourceFiles="$(PublishDir)wwwroot\*" DestinationFolder="$(PublishDir)wwwroot" Recursive="true" />
+  </Target>
+  -->
+
+  <!-- PostBuild target to move all files from wwwroot to the doc directory -->
+  <Target Name="PostBuild" AfterTargets="Publish">
+    <!-- Copy all files from wwwroot to the doc directory -->
+    <Copy SourceFiles="@(Content)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true">
+      <Output TaskParameter="CopiedFiles" ItemName="CopiedFiles" />
+    </Copy>
+  </Target>
+  
 </Project>

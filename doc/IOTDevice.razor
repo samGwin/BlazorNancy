@@ -1,0 +1,80 @@
+﻿@page "/iotdevice"
+@using System.Net.Http
+@using System.Net.Http.Json
+@using System.Text.Json
+@inject HttpClient Http
+
+<h3>IOT Device</h3>
+
+@if (data == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (error != null)
+{
+    <p><em>Error: @error</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Device ID</th>
+                <th>Device Type</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in data)
+            {
+                <tr>
+                    <td>@item.DeviceId</td>
+                    <td>@item.DeviceType</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Device> data;
+    private string error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            data = await Http.GetFromJsonAsync<List<Device>>("https://sampleiot.zackcheng.com/devices");
+        }
+        catch (HttpRequestException httpEx)
+        {
+            error = $"Request error: {httpEx.Message}";
+        }
+        catch (NotSupportedException nsEx) // When content type is not valid
+        {
+            error = $"Content type error: {nsEx.Message}";
+        }
+        catch (JsonException jsonEx) // Invalid JSON
+        {
+            error = $"JSON error: {jsonEx.Message}";
+        }
+        catch (Exception ex) // For other exceptions
+        {
+            error = $"Unknown error: {ex.Message}";
+        }
+    }
+
+    [Serializable]
+    public class Device
+    {
+        //[JsonPropertyName("DeviceId")]
+        public string DeviceId { get; set; }
+
+        //[JsonPropertyName("DeviceType")]
+        public string DeviceType { get; set; }
+
+        //[JsonPropertyName("TelemetryNames")]
+        public string[] TelemetryNames { get; set; }
+
+        //public override string ToString() => JsonSerializer.Serialize(this);
+    }
+}
