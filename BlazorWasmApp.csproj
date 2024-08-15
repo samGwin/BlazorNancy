@@ -18,20 +18,19 @@
 	</Target>
   -->
 
-  <!-- Copy index.html to the root of the doc directory -->
-  <!--
-  <Target Name="PostBuild" AfterTargets="Publish">
-    <Copy SourceFiles="$(PublishDir)wwwroot\index.html" DestinationFolder="$(PublishDir)" />
-    <Copy SourceFiles="$(PublishDir)wwwroot\*" DestinationFolder="$(PublishDir)wwwroot" Recursive="true" />
-  </Target>
-  -->
-
   <!-- PostBuild target to move all files from wwwroot to the doc directory -->
   <Target Name="PostBuild" AfterTargets="Publish">
-    <!-- Copy all files from wwwroot to the doc directory -->
-    <Copy SourceFiles="@(Content)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true">
-      <Output TaskParameter="CopiedFiles" ItemName="CopiedFiles" />
-    </Copy>
+    <!-- Include all files from wwwroot recursively -->
+    <CreateItem Include="$(PublishDir)wwwroot\**\*" Exclude="$(PublishDir)wwwroot\">
+      <Output TaskParameter="Include" ItemName="FilesToCopy" />
+    </CreateItem>
+    <!-- Copy files to the root of the publish directory -->
+    <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$(PublishDir)%(RecursiveDir)" SkipUnchangedFiles="true" />
+    <!-- Remove the original wwwroot directory after copying -->
+    <RemoveDir Directories="$(PublishDir)wwwroot" />
+    <!-- Create the .nojekyll file in the publish directory -->
+    <WriteLinesToFile File="$(PublishDir).nojekyll" Lines="" Overwrite="true" />
   </Target>
+  
   
 </Project>
